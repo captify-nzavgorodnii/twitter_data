@@ -17,7 +17,7 @@ from __future__ import print_function
 from future.standard_library import install_aliases
 install_aliases()
 import logging
-
+from twitter import DataFetcher
 from urllib.parse import urlparse, urlencode
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
@@ -30,6 +30,8 @@ from flask import make_response
 from urllib.parse import urlparse, urlencode
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
+from configparser import ConfigParser
+from tweepy import OAuthHandler
 
 import json
 import os
@@ -38,6 +40,19 @@ import os
 # Flask app should start in global layout
 app = Flask(__name__)
 
+## Twitter API credentials
+config = ConfigParser()
+config.read('twitter.cfg')
+
+CONSUMER_KEY = config['credentials']['consumer_key']
+CONSUMER_SECRET = config['credentials']['consumer_secret']
+ACCESS_TOKEN = config['credentials']['access_token']
+ACCESS_SECRET = config['credentials']['access_secret']
+
+auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
+
+datafetcher = DataFetcher(config, auth)
 
 @app.route('/', methods=['GET', 'POST'])
 def hello():
@@ -63,6 +78,8 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 def makeWebhookResult(req):
+    datafetcher.downloadTweets(req.get('result').get('parameters').get('given-name'))
+
     return {
         "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get('given-name'),
         "displayText": "tyest diplay text",
