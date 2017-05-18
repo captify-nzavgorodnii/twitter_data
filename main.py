@@ -30,6 +30,18 @@ from tweepy import OAuthHandler
 
 import json
 
+import os.path
+import sys
+
+try:
+    import apiai
+except ImportError:
+    sys.path.append(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+    )
+    import apiai
+
+
 # Flask app should start in global layout
 app = Flask(__name__)
 
@@ -43,7 +55,9 @@ CONSUMER_KEY = config['credentials']['consumer_key']
 CONSUMER_SECRET = config['credentials']['consumer_secret']
 ACCESS_TOKEN = config['credentials']['access_token']
 ACCESS_SECRET = config['credentials']['access_secret']
+CLIENT_ACCESS_TOKEN = config['credentials']['apiai_key']
 
+ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
 auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 
@@ -73,7 +87,17 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 def makeWebhookResult(req):
+    apiai_request = ai.text_request()
+    apiai_request.session_id = req.get('sessionId')
+    apiai_request.query = "I am thinking...please hold tight :) "
+
+    response = apiai_request.getresponse()
+
     datafetcher.download_tweets(req.get('result').get('parameters').get('given-name'))
+
+    apiai_request = ai.text_request()
+    apiai_request.query = "all done!"
+    apiai_request = request.getresponse()
 
     return {
         "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get('given-name'),
