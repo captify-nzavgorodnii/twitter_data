@@ -3,3 +3,4 @@ gunicorn==19.7.1
 future==0.16.0
 configparser
 tweepy
+pymongo
