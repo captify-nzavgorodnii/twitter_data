@@ -49,6 +49,7 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 
 datafetcher = DataFetcher(config, auth)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def hello():
     a = {'name': 'captibot'}
@@ -72,11 +73,14 @@ def server_error(e):
     logging.exception('An error occurred during a request.')
     return 'An internal error occurred.', 500
 
+
 def makeWebhookResult(req):
     datafetcher.download_tweets(req.get('result').get('parameters').get('given-name'))
 
+
     return {
-        "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get('given-name'),
+        "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get(
+            'given-name'),
         "displayText": "tyest diplay text",
         # "data": data,
         # "contextOut": [],
