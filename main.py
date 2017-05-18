@@ -14,35 +14,30 @@
 
 # [START app]
 from __future__ import print_function
+
 from future.standard_library import install_aliases
+
 install_aliases()
 import logging
-from twitter import DataFetcher
-from urllib.parse import urlparse, urlencode
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
+from twitter_data_fetcher import DataFetcher
 
 from flask import Flask
-from flask import jsonify
 from flask import request
 from flask import make_response
 
-from urllib.parse import urlparse, urlencode
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
 from configparser import ConfigParser
 from tweepy import OAuthHandler
 
 import json
-import os
-
 
 # Flask app should start in global layout
 app = Flask(__name__)
 
-## Twitter API credentials
+########################################################################
+# Twitter API credentials
+########################################################################
 config = ConfigParser()
-config.read('twitter.cfg')
+config.read('credentials.ini')
 
 CONSUMER_KEY = config['credentials']['consumer_key']
 CONSUMER_SECRET = config['credentials']['consumer_secret']
@@ -78,7 +73,7 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 def makeWebhookResult(req):
-    datafetcher.downloadTweets(req.get('result').get('parameters').get('given-name'))
+    datafetcher.download_tweets(req.get('result').get('parameters').get('given-name'))
 
     return {
         "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get('given-name'),
