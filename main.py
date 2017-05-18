@@ -19,7 +19,7 @@ from future.standard_library import install_aliases
 
 install_aliases()
 import logging
-from twitter import DataFetcher
+from twitter_data_fetcher import DataFetcher
 
 from flask import Flask
 from flask import request
