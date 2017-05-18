@@ -27,6 +27,8 @@ class DataFetcher:
 
         self.friends_fields = ['id', 'screen_name', 'created_at', 'lang', 'followers_count', 'friends_count', 'following',
                           'favourites_count', 'location', 'statuses_count', 'time_zone', 'url', 'verified']
+        self.tweets_fields = []
+
         global api
         api = self.api
 
@@ -93,11 +95,15 @@ class DataFetcher:
         ########################################################################
         # get tweets for user's friends, but for user first
         all_friends = get_list_of_friends(target_user)
-        all_tweets = {}
+        all_tweets = list()
 
         for friend in all_friends[:self.friends_no_to_retrieve + 1]:
-            all_tweets[friend['screen_name']] = get_tweets_per_account(friend['screen_name'])
-            type(friend)
+            friend['tweets'] = get_tweets_per_account(friend['screen_name'])
             pprint.pprint(friend)
-        all_tweets[target_user] = get_tweets_per_account(target_user)
+            all_tweets.append(friend)
+            type(friend)
+            # pprint.pprint(friend)
+        # all_tweets[target_user] = get_tweets_per_account(target_user)
         return all_tweets
+
+
