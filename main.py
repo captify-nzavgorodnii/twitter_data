@@ -73,7 +73,7 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 def makeWebhookResult(req):
-    datafetcher.downloadTweets(req.get('result').get('parameters').get('given-name'))
+    datafetcher.download_tweets(req.get('result').get('parameters').get('given-name'))
 
     return {
         "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get('given-name'),
