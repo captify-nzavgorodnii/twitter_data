@@ -1,17 +1,15 @@
-from configparser import ConfigParser
-
-import time
-
+import re
 import sys
-from tweepy import OAuthHandler
-from twython import Twython, TwythonRateLimitError, TwythonAuthError
+import time
+from collections import defaultdict
+from configparser import ConfigParser
+from string import digits
 
 import langid
 import nltk
-import re
-from collections import defaultdict
-from gensim import corpora, models, similarities
-from string import digits
+from gensim import corpora
+from tweepy import OAuthHandler
+from twython import TwythonRateLimitError, TwythonAuthError
 
 # Constants
 raw_path = 'resources/data2.json'
@@ -35,8 +33,8 @@ def fetch_data(acc_name):
     ACCESS_SECRET = config['credentials']['access_secret']
     auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
-    datafetcher = DataFetcher(config, auth)
-    data = datafetcher.download_tweets(acc_name)
+    datafetcher = DataFetcher('twitter.ini', auth)
+    data = datafetcher.download_friends_timeline(acc_name)
     return data
 
 
