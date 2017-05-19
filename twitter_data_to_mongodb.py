@@ -45,13 +45,13 @@ class MongoDBHandler:
         else:
             # update the existing account record
             res = db.tweets.replace_one(
-                {'user_id': user_id}, item
+                {'user_id': item['user_id']}, item
             )
             # result of the update
             if res.matched_count == 0:
-                print("no match for user_id: ", user_id)
+                print("no match for user_id: ", item['user_id'])
             elif res.modified_count == 0:
-                print("no modification for user_id: ", user_id)
+                print("no modification for user_id: ", item['user_id'])
             else:
                 print("replaced ", item['screen_name'], item['user_id'], item['n_tweets'], item['lang'])
 

@@ -4,6 +4,14 @@ import pprint
 import tweepy
 
 
+class PrettyJson():
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __repr__(self):
+        return pprint.pformat(self.obj)
+
+
 class DataFetcher:
     def __init__(self, config_name, auth):
         ########################################################################
@@ -128,7 +136,7 @@ class DataFetcher:
 
         for friend in all_friends[:self.friends_no_to_retrieve + 1]:
             tweets_item = timeline_shortener(get_user_timeline(friend['screen_name']), target_user)
-            pprint.pprint(tweets_item)
+            logging.debug(PrettyJson(tweets_item))
             all_tweets.append(tweets_item)
             print("Saving tweets to Mongo DB")
             mongodb.save_user_timeline(tweets_item)
