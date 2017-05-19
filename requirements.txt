@@ -1,3 +1,4 @@
+gensim
 Flask==0.12.1
 gunicorn==19.7.1
 future==0.16.0

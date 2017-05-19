@@ -34,6 +34,7 @@ class DataFetcher:
 
         self.friends_fields = ['id', 'screen_name', 'created_at', 'lang', 'followers_count', 'friends_count',
                                'following', 'location', 'statuses_count', 'time_zone', 'url', 'verified']
+
         global api
         api = self.api
 
@@ -142,3 +143,5 @@ class DataFetcher:
             mongodb.save_user_timeline(tweets_item)
         # all_tweets[target_user] = get_user_timeline(target_user)
         return all_tweets
+
+
