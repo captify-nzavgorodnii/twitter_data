@@ -47,7 +47,7 @@ ACCESS_SECRET = config['credentials']['access_secret']
 auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 
-datafetcher = DataFetcher(config, auth)
+datafetcher = DataFetcher('twitter.ini', auth)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -75,7 +75,7 @@ def server_error(e):
 
 
 def makeWebhookResult(req):
-    datafetcher.download_tweets(req.get('result').get('parameters').get('given-name'))
+    datafetcher.download_friends_timeline(req.get('result').get('parameters').get('given-name'))
 
 
     return {
