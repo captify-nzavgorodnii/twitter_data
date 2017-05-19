@@ -1,5 +1,7 @@
+import csv
 import os
 
+import re
 from gensim import corpora, models
 
 path = 'resources'
@@ -29,5 +31,41 @@ def load_model():
 hdp = load_model()
 
 topics = hdp.print_topics(num_words=12)
-for topic in topics:
-    print(topic)
+
+
+def pretty_output(ts):
+
+    def save_to_csv(ts):
+        out = list()
+        regex = re.compile('[^a-zA-Z]')
+        for t in ts:
+            row = list()
+            row.append('Topic ' +str(t[0]+1))
+            li = t[1].split('+')
+            li = [x.strip() for x in li]
+            li = [regex.sub('', x) for x in li]
+            row.extend(li)
+            out.append(row)
+            # print(row) #  DEBUG
+        f = open('resources/data.csv', 'w')
+        w = csv.writer(f)
+        w.writerows(out)
+        f.close()
+
+    save_to_csv(ts)
+
+    def create_json(ts):
+        out = dict()
+        regex = re.compile('[^a-zA-Z]')
+        for t in ts:
+            key = 'Topic ' + str(t[0] + 1)
+            li = t[1].split('+')
+            li = [x.strip() for x in li]
+            li = [regex.sub('', x) for x in li]
+            out[key] = li
+        return out
+
+    print(create_json(ts))
+
+
+pretty_output(topics)
