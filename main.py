@@ -17,6 +17,8 @@ from __future__ import print_function
 
 from future.standard_library import install_aliases
 
+from topic_model_hdp import get_answer
+
 install_aliases()
 import logging
 from twitter_data_fetcher import DataFetcher
@@ -77,6 +79,8 @@ def server_error(e):
 def makeWebhookResult(req):
     datafetcher.download_friends_timeline(req.get('result').get('parameters').get('given-name'))
 
+    parsed_twitter_account_name = 'Honda'
+    ans = get_answer(parsed_twitter_account_name)
 
     return {
         "speech": "Hi, I am the backend, this is the name I have received: " + req.get('result').get('parameters').get(
