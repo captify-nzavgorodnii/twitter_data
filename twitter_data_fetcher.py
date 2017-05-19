@@ -78,29 +78,33 @@ class DataFetcher:
         def timeline_shortener(timeline, parent_user):
             tweet_fields = {'created_at', 'favorite_count', 'id', 'lang', 'retweet_count', 'text'}
             timeline_short = []
-            for twt in timeline:
-                # pprint.pprint(twt)
-                tweet_short = {}
-                for field, value in twt.items():
-                    if field in tweet_fields:
-                        tweet_short[field] = value
-                if twt['place'] is None:
-                    tweet_short['country'] = None
-                    tweet_short['country_code'] = None
-                else:
-                    tweet_short['country'] = twt['place']['country']
-                    tweet_short['country_code'] = twt['place']['country_code']
-                timeline_short.append(tweet_short)
-            # pprint.pprint(timeline_short)
-            # print()
-            item = {
-                'tweets': timeline_short,
-                'n_tweets': len(timeline_short),
-                'screen_name': timeline[0]['user']['screen_name'],
-                'user_id': timeline[0]['user']['id'],
-                'lang': timeline[0]['lang'],
-                'parent_account': parent_user
-            }
+            try:
+                for twt in timeline:
+                    # pprint.pprint(twt)
+                    tweet_short = {}
+                    for field, value in twt.items():
+                        if field in tweet_fields:
+                            tweet_short[field] = value
+                    if twt['place'] is None:
+                        tweet_short['country'] = None
+                        tweet_short['country_code'] = None
+                    else:
+                        tweet_short['country'] = twt['place']['country']
+                        tweet_short['country_code'] = twt['place']['country_code']
+                    timeline_short.append(tweet_short)
+                # pprint.pprint(timeline_short)
+                # print()
+                item = {
+                    'tweets': timeline_short,
+                    'n_tweets': len(timeline_short),
+                    'screen_name': timeline[0]['user']['screen_name'],
+                    'user_id': timeline[0]['user']['id'],
+                    'lang': timeline[0]['lang'],
+                    'parent_account': parent_user
+                }
+            except Exception as e:
+                logging.error("Unable to process data for user {}".format(parent_user), e)
+
             return item
 
         ########################################################################
