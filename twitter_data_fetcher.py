@@ -12,7 +12,7 @@ class DataFetcher:
         from configparser import ConfigParser
         self.auth = auth
         self.api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-
+        self.config_name = config_name
         config = ConfigParser()
         config.read(config_name)
         # self.config = config
@@ -82,12 +82,13 @@ class DataFetcher:
                     tweet_short['country'] = twt['place']['country']
                     tweet_short['country_code'] = twt['place']['country_code']
                 timeline_short.append(tweet_short)
-            pprint.pprint(timeline_short)
-            print()
+            # pprint.pprint(timeline_short)
+            # print()
             item = {
                 'tweets': timeline_short,
                 'n_tweets': len(timeline_short),
                 'screen_name': timeline[0]['user']['screen_name'],
+                'user_id': timeline[0]['user']['id'],
                 'lang': timeline[0]['lang'],
                 'parent_account': parent_user
             }
@@ -117,16 +118,19 @@ class DataFetcher:
         ########################################################################
         # Main part
         ########################################################################
+        # Initialise Mongo DB
+        from twitter_data_to_mongodb import MongoDBHandler
+        mongodb = MongoDBHandler('credentials.ini')
+
         # get tweets for user's friends, but for user first
         all_friends = self.get_list_of_friends(target_user)
         all_tweets = []
 
         for friend in all_friends[:self.friends_no_to_retrieve + 1]:
-            user_timeline = get_user_timeline(friend['screen_name'])
-            type(friend)
-            tweets_item = timeline_shortener(user_timeline, target_user)
-
-            pprint.pprint(friend)
+            tweets_item = timeline_shortener(get_user_timeline(friend['screen_name']), target_user)
+            pprint.pprint(tweets_item)
             all_tweets.append(tweets_item)
+            print("Saving tweets to Mongo DB")
+            mongodb.save_user_timeline(tweets_item)
         # all_tweets[target_user] = get_user_timeline(target_user)
         return all_tweets

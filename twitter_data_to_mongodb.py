@@ -2,57 +2,58 @@ import logging
 
 from pymongo import MongoClient
 
-# Display progress logs on stdout
-logging.basicConfig(level=logging.INFO,
-                    format='>>> %(asctime)s %(levelname)s %(message)s')
 
-from configparser import ConfigParser
-from urllib.parse import quote_plus
-config = ConfigParser()
-config.read('credentials.ini')
-mongodb_uri = "mongodb://%s:%s@%s:%s" % (quote_plus(config['mongodb']['username']),
-                                         quote_plus(config['mongodb']['password']),
-                                         config['mongodb']['host'],
-                                         config['mongodb']['port'])
-# print(mongodb_uri)
-# print(mongodb_uri)
-mongo_db_name = config['mongodb']['db_name']
+class MongoDBHandler:
+    def __init__(self, config_name):
+        # Display progress logs on stdout
+        logging.basicConfig(level=logging.INFO,
+                            format='>>> %(asctime)s %(levelname)s %(message)s')
 
-#  MongoDB connection
-client = MongoClient(mongodb_uri)
-db = client[mongo_db_name]
+        from configparser import ConfigParser
+        from urllib.parse import quote_plus
+        config = ConfigParser()
+        config.read(config_name)
+        mongodb_uri = "mongodb://%s:%s@%s:%s" % (quote_plus(config['mongodb']['username']),
+                                                 quote_plus(config['mongodb']['password']),
+                                                 config['mongodb']['host'],
+                                                 config['mongodb']['port'])
+        # print(mongodb_uri)
+        # mongo_db_name = config['mongodb']['db_name']
 
-from pymongo.errors import ConnectionFailure
-try:
-    # The ismaster command is cheap and does not require auth.
-    client.admin.command('ismaster')
-except ConnectionFailure:
-    print("Server not available")
+        #  MongoDB connection
+        self.client = MongoClient(mongodb_uri)
 
-print(client.database_names())
+        from pymongo.errors import ConnectionFailure
+        try:
+            # The ismaster command is cheap and does not require auth.
+            self.client.admin.command('ismaster')
+        except ConnectionFailure:
+            print("Server not available")
 
-client['friends']
+        print(self.client.database_names())
 
-from twitter_data_fetcher import DataFetcher
-##Twitter credentials
-
-from configparser import ConfigParser
-from tweepy import OAuthHandler
-
-config = ConfigParser()
-config.read('credentials.ini')
-
-CONSUMER_KEY = config['credentials']['consumer_key']
-CONSUMER_SECRET = config['credentials']['consumer_secret']
-ACCESS_TOKEN = config['credentials']['access_token']
-ACCESS_SECRET = config['credentials']['access_secret']
-
-auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
-
-datafetcher = DataFetcher('twitter.ini', auth)
-
-tweets = datafetcher.download_friends_timeline('Honda')
+    def save_user_timeline(self, item):
+        db_name = 'timeline'
+        db = self.client[db_name]
+        print(item['user_id'])
+        type(item['user_id'])
+        twt = db.tweets.find({'user_id': item['user_id']})
+        if twt.count() == 0:
+            # save user timeline
+            print("New account:", item['screen_name'], item['user_id'], item['n_tweets'], item['lang'])
+            db.tweets.insert_one(item)
+        else:
+            # update the existing account record
+            res = db.tweets.replace_one(
+                {'user_id': user_id}, item
+            )
+            # result of the update
+            if res.matched_count == 0:
+                print("no match for user_id: ", user_id)
+            elif res.modified_count == 0:
+                print("no modification for user_id: ", user_id)
+            else:
+                print("replaced ", item['screen_name'], item['user_id'], item['n_tweets'], item['lang'])
 
 #
 # def save_tweets(self, tweets):
