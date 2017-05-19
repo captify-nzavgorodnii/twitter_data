@@ -10,12 +10,11 @@ from configparser import ConfigParser
 from urllib.parse import quote_plus
 config = ConfigParser()
 config.read('credentials.ini')
-# mongodb_uri = quote_plus(config['mongodb']['uri'])
-mongodb_uri = uri = "mongodb://%s:%s@%s:%s" % (quote_plus(config['mongodb']['username']),
-                                            quote_plus(config['mongodb']['password']),
-                                            config['mongodb']['host'],
-                                            config['mongodb']['port'])
-print(mongodb_uri)
+mongodb_uri = "mongodb://%s:%s@%s:%s" % (quote_plus(config['mongodb']['username']),
+                                         quote_plus(config['mongodb']['password']),
+                                         config['mongodb']['host'],
+                                         config['mongodb']['port'])
+# print(mongodb_uri)
 # print(mongodb_uri)
 mongo_db_name = config['mongodb']['db_name']
 
@@ -31,3 +30,5 @@ except ConnectionFailure:
     print("Server not available")
 
 print(client.database_names())
+
+client['friends']
