@@ -56,6 +56,47 @@ class MongoDBHandler:
             else:
                 print("replaced ", item['screen_name'], item['user_id'], item['n_tweets'], item['lang'])
 
+    def aggregate_tweets(self, timeline, lang=None):
+        """
+        Get the user's timeline with the list of tweets in the following format and aggregate into one document.
+
+        {'lang': 'en',
+         'n_tweets': 100,
+         'parent_account': 'Honda',
+         'screen_name': 'Kevinloveslife',
+         'user_id': 701100381380546561,
+         'tweets': [{'country': None,
+             'country_code': None,
+             'created_at': 'Sun May 14 23:38:58 +0000 2017',
+             'favorite_count': 0,
+             'id': 863901480285241346,
+             'lang': 'en',
+             'retweet_count': 0,
+             'text': 'Last time flying @united. pilot Joe is a complete ass '
+                     'hole. United flight 3556. Yells at us for using the '
+                     'bathroom when we are delayed 1hr.'},
+            {'country': None,
+             'country_code': None,
+             'created_at': 'Fri May 12 00:16:08 +0000 2017',
+             'favorite_count': 1,
+             'id': 862823672054243328,
+             'lang': 'en',
+             'retweet_count': 0,
+             'text': "@DMC_Ryan I'm literally sobbing in the airport while "
+                     'listening to podcast unlocked and looking at pictures of '
+                     'Maggie. Dogs are the best.'}]
+                     }
+
+        :param lang: str
+        :param timeline: dict
+        :return: dict('user_id': account_id, 'all_tweets': str(concatenated_tweets))
+        """
+        if lang is None:
+            twt_doc = ' '.join([t['text'] for t in timeline['tweets']])
+        else:
+            twt_doc = ' '.join([t['text'] for t in timeline['tweets'] if t['lang'] == lang])
+        return {'user_id': timeline['user_id'], 'all_tweets': twt_doc}
+
     def get_timelines_for_parent(self, parent_name):
         """
         Get timelines for all friends (following) for this twitter account and return tweets aggregated for each user.
@@ -64,50 +105,24 @@ class MongoDBHandler:
                   {'user_id': 220, 'all_tweets': 'Tweet 21. Tweet 22. Tweet 23'}]
         """
 
-        def aggregate_tweets(timeline, lang=None):
-            """
-            Get the user's timeline with the list of tweets in the following format and aggregate into one document.
-
-            {'lang': 'en',
-             'n_tweets': 100,
-             'parent_account': 'Honda',
-             'screen_name': 'Kevinloveslife',
-             'user_id': 701100381380546561,
-             'tweets': [{'country': None,
-                 'country_code': None,
-                 'created_at': 'Sun May 14 23:38:58 +0000 2017',
-                 'favorite_count': 0,
-                 'id': 863901480285241346,
-                 'lang': 'en',
-                 'retweet_count': 0,
-                 'text': 'Last time flying @united. pilot Joe is a complete ass '
-                         'hole. United flight 3556. Yells at us for using the '
-                         'bathroom when we are delayed 1hr.'},
-                {'country': None,
-                 'country_code': None,
-                 'created_at': 'Fri May 12 00:16:08 +0000 2017',
-                 'favorite_count': 1,
-                 'id': 862823672054243328,
-                 'lang': 'en',
-                 'retweet_count': 0,
-                 'text': "@DMC_Ryan I'm literally sobbing in the airport while "
-                         'listening to podcast unlocked and looking at pictures of '
-                         'Maggie. Dogs are the best.'}]
-                         }
-
-            :param lang: str
-            :param timeline: dict
-            :return: dict('user_id': account_id, 'all_tweets': str(concatenated_tweets))
-            """
-            if lang is None:
-                twt_doc = ' '.join([t['text'] for t in timeline['tweets']])
-            else:
-                twt_doc = ' '.join([t['text'] for t in timeline['tweets'] if t['lang'] == lang])
-            return {'user_id': timeline['user_id'], 'all_tweets': twt_doc}
-
         db = self.db
         cursor = db.tweets.find({'parent_account': parent_name})
         friends_tweets = []
         for tl in range(cursor.count()):
-            friends_tweets.append(aggregate_tweets(cursor.next()))
+            friends_tweets.append(self.aggregate_tweets(cursor.next()))
         return friends_tweets
+
+    def get_user_timeline(self, account_name):
+        """
+        Get timeline for specified user.
+        :param account_name: str
+        :return: {'user_id': 110, 'all_tweets': 'Tweet 11. Tweet 12. Tweet 13'}
+        """
+
+        db = self.db
+        cursor = db.tweets.find({'screen_name': account_name})
+        if cursor.count() > 0:
+            return cursor.next()
+        else:
+            logging.error("There are {} entries in DB for user {}".format(cursor.count(), account_name))
+            raise BaseException("Tweet for specified account not found")
