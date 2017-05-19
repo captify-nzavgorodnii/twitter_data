@@ -19,9 +19,9 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 
 datafetcher = DataFetcher('twitter.ini', auth)
 
-# tweets = datafetcher.download_friends_timeline('Honda')
+tweets = datafetcher.download_friends_timeline('Honda')
 
-accounts_to_retrieve_data_for = ['realDonaldTrump', 'Honda', 'Apple', 'Nike', 'AndrewYNg']
+# accounts_to_retrieve_data_for = ['realDonaldTrump', 'Honda', 'Apple', 'Nike', 'AndrewYNg']
 
 for acc in accounts_to_retrieve_data_for:
     print("------------------------------------------")

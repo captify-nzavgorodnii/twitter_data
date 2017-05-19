@@ -122,7 +122,36 @@ class MongoDBHandler:
         db = self.db
         cursor = db.tweets.find({'screen_name': account_name})
         if cursor.count() > 0:
-            return cursor.next()
+            return self.aggregate_tweets(cursor.next())
         else:
             logging.error("There are {} entries in DB for user {}".format(cursor.count(), account_name))
             raise BaseException("Tweet for specified account not found")
+
+    def get_other_tweets(self, except_account):
+        """
+        Get list of tweets for other accounts which is not `except_account` and it's not a parent. 
+        :param except_account: 
+        :return: 
+        """
+        db = self.db
+        # cursor = db.tweets.find({'parent_name': {'$nin': [except_account, None]}})
+        cursor = db.tweets.find({'parent_name': {'$ne': except_account}})
+        other_tweets = []
+        threshold = 10
+        tries = 50
+        i = 0
+        j = 0
+        while i < threshold or j < tries:
+            tl = cursor.next()
+            # pprint(tl)
+            j += 1
+            if tl['screen_name'] != except_account and tl['parent_account'] != except_account:
+                other_tweets.append(self.aggregate_tweets(tl)['all_tweets'])
+                i += 1
+
+        # for i in range(min(cursor.count(), 10)):
+        #     tl = cursor.next()
+        #     pprint(tl)
+        #     if tl['screen_name'] != except_account:
+        #         other_tweets.append(self.aggregate_tweets(tl))
+        return other_tweets

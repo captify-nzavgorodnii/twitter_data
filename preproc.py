@@ -254,4 +254,4 @@ def filter_lang(lang, documents):
     return [documents[k] for k in range(len(documents)) if doclang[k][0] == lang]
 
 
-preprocess_tweets(tweets)
+# preprocess_tweets(tweets)

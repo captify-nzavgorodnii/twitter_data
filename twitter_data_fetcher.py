@@ -132,7 +132,7 @@ class DataFetcher:
         # Main part
         ########################################################################
         # Initialise Mongo DB
-        from twitter_data_to_mongodb import MongoDBHandler
+        from mongodb_handler import MongoDBHandler
         mongodb = MongoDBHandler('credentials.ini')
 
         # get tweets for user's friends, but for user first
