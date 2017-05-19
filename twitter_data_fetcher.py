@@ -6,7 +6,7 @@ import tweepy
 
 
 class DataFetcher:
-    def __init__(self, config, auth):
+    def __init__(self, config_name, auth):
         ########################################################################
         # Read config for tweets collection
         ########################################################################
@@ -15,7 +15,7 @@ class DataFetcher:
         self.api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
         config = ConfigParser()
-        config.read('twitter.ini')
+        config.read(config_name)
         # self.config = config
         self.friends_no_to_retrieve = int(config['general']['friends_no_to_retrieve'])
         self.friends_sort_by = config['general']['friends_sort_by']
